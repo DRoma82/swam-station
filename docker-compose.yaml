@@ -7,9 +7,9 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/Vancouver
-       - WEBUI_PORT=9090
+      - WEBUI_PORT=9090
     volumes:
-      - /mnt/docker/apps/qbittorrent:/config
+      - ./apps/qbittorrent:/config
       - /mnt/seagate:/seagate
       - /home/dani/Downloads:/watch
     ports:
@@ -26,7 +26,7 @@ services:
       - PGID=1000
       - TZ=America/Vancouver
     volumes:
-      - /mnt/docker/apps/jackett:/config
+      - ./apps/jackett:/config
       - /home/dani/Downloads:/seagate/downloads
     ports:
       - 9117:9117
@@ -40,7 +40,7 @@ services:
       - PGID=1000
       - TZ=America/Vancouver
     volumes:
-      - /mnt/docker/apps/sonarr:/config
+      - ./apps/sonarr:/config
       - /mnt/seagate:/seagate
     ports:
       - 8989:8989
@@ -54,7 +54,7 @@ services:
       - PGID=1000
       - TZ=America/Vancouver
     volumes:
-      - /mnt/docker/apps/radarr:/config
+      - ./apps/radarr:/config
       - /mnt/seagate:/seagate
     ports:
       - 7878:7878
@@ -68,7 +68,7 @@ services:
      ports:
           - 5055:5055
      volumes:
-          - /mnt/docker/apps/jellyseerr:/app/config
+          - ./apps/jellyseerr:/app/config
 
      restart: unless-stopped
 
@@ -81,7 +81,7 @@ services:
       - TZ=America/Vancouver
       - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
     volumes:
-      - /mnt/docker/apps/jellyfin:/config
+      - ./apps/jellyfin:/config
       - /mnt/seagate/media/sonarr:/data/tvshows
       - /mnt/seagate/media/radarr:/data/movies
       - /mnt/seagate/media/Bellesa:/data/bellesa
