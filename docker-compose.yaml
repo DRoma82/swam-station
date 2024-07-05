@@ -96,6 +96,15 @@ services:
       - 1900:1900/udp #optional
     restart: unless-stopped
 
+  tinfoil:
+    image: nginx:alpine
+    container_name: tinfoil
+    volumes:
+      - /mnt/seagate/tinfoil:/usr/share/nginx/html/:ro
+      - ./tinfoil:/etc/nginx:ro
+    ports:
+      - 9000:9000
+
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
