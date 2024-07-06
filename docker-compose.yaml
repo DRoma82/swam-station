@@ -1,5 +1,13 @@
-version: "3.7"
 services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - 3000:3000
+    volumes:
+      - ./apps/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -113,5 +121,7 @@ services:
       - TZ=America/Vancouver
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup
+    ports:
+      - 8080:8080
+    command: --cleanup --http-api-metrics --http-api-token 7a0d0d86a020649bd22512de60db8c9c29d8aa228e440039b01d95cd868fe983
     restart: unless-stopped

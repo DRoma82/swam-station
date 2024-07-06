@@ -1,2 +1,4 @@
 apps/
+!apps/homepage/
+apps/homepage/logs
 .htpasswd
