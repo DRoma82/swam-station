@@ -14,3 +14,10 @@ background:
 headerStyle: boxed
 showStats: true
 
+layout:
+    Apps:
+      style: row
+      icon: mdi-application-brackets
+    Tools:
+      style: row
+      icon: mdi-tools

@@ -66,7 +66,7 @@
         container: tinfoil
         siteMonitor: http://tinfoil:9000
 
-- Settings:
+- Tools:
     - qBitTorrent:
         icon: qbittorrent
         href: http://10.0.0.240:9090
