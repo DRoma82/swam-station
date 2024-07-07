@@ -2,10 +2,18 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
+    environment:
+      - HOMEPAGE_VAR_JELLYFIN_KEY=${SECRET_JELLYFIN_KEY?error}
+      - HOMEPAGE_VAR_QBIT_PWD=${SECRET_QBIT_PWD?error}
+      - HOMEPAGE_VAR_JACKETT_PWD=${SECRET_JACKETT_PWD?error}
+      - HOMEPAGE_VAR_SONARR_KEY=${SECRET_SONARR_KEY?error}
+      - HOMEPAGE_VAR_WATCHTOWER_KEY=${SECRET_WATCHTOWER_KEY?error}
+      - HOMEPAGE_VAR_RADARR_KEY=${SECRET_RADARR_KEY?error}
     ports:
       - 3000:3000
     volumes:
       - ./apps/homepage:/app/config
+      - /mnt/seagate:/mnt/seagate
       - /var/run/docker.sock:/var/run/docker.sock
 
   qbittorrent:
@@ -123,5 +131,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8080:8080
-    command: --cleanup --http-api-metrics --http-api-token 7a0d0d86a020649bd22512de60db8c9c29d8aa228e440039b01d95cd868fe983
+    command: --cleanup --http-api-metrics --http-api-token ${SECRET_WATCHTOWER_KEY?error}
     restart: unless-stopped

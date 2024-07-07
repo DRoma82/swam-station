@@ -1,3 +1,4 @@
+.secrets
 apps/*
 !apps/homepage/
 apps/homepage/logs
