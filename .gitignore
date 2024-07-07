@@ -1,5 +1,6 @@
 .secrets
 .duck_token
+duck.log
 apps/*
 !apps/homepage/
 apps/homepage/logs
