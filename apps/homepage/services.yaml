@@ -92,6 +92,12 @@
           type: jackett
           url: http://jackett:9117
           password: {{HOMEPAGE_VAR_JACKETT_PWD}}
+    - DDClient:
+        icon: mdi-dns
+        description: Dynamic DNS update
+        ping: ddclient
+        server: swam-station-docker
+        container: ddclient
     - Watchtower:
         icon: watchtower
         description: Automated Docker Container Updater

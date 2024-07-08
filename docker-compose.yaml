@@ -16,6 +16,19 @@ services:
       - /mnt/seagate:/mnt/seagate
       - /var/run/docker.sock:/var/run/docker.sock
 
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Vancouver
+      - CLOUDFLARE_PWD=${SECRET_CLOUDFLARE_PWD?error}
+      - DUCKDNS_KEY=${SECRET_DUCKDNS_KEY?error}
+    volumes:
+      - ./ddclient:/config
+    restart: unless-stopped
+
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
