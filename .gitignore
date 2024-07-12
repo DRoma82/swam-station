@@ -1,5 +1,5 @@
 .env
-.secrets
+.secrets.env
 .duck_token
 duck.log
 apps/*
