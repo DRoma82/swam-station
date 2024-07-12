@@ -1,3 +1,4 @@
+.env
 .secrets
 .duck_token
 duck.log

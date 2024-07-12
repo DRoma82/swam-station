@@ -2,13 +2,8 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
-    environment:
-      - HOMEPAGE_VAR_JELLYFIN_KEY=${SECRET_JELLYFIN_KEY?error}
-      - HOMEPAGE_VAR_QBIT_PWD=${SECRET_QBIT_PWD?error}
-      - HOMEPAGE_VAR_JACKETT_PWD=${SECRET_JACKETT_PWD?error}
-      - HOMEPAGE_VAR_SONARR_KEY=${SECRET_SONARR_KEY?error}
-      - HOMEPAGE_VAR_WATCHTOWER_KEY=${SECRET_WATCHTOWER_KEY?error}
-      - HOMEPAGE_VAR_RADARR_KEY=${SECRET_RADARR_KEY?error}
+    env_file:
+      - .secrets.env
     ports:
       - 3000:3000
     volumes:
@@ -19,12 +14,9 @@ services:
   ddclient:
     image: lscr.io/linuxserver/ddclient:latest
     container_name: ddclient
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
-      - CLOUDFLARE_PWD=${SECRET_CLOUDFLARE_PWD?error}
-      - DUCKDNS_KEY=${SECRET_DUCKDNS_KEY?error}
+    env_file:
+      - .shared.env
+      - .secrets.env
     volumes:
       - ./ddclient:/config
     restart: unless-stopped
@@ -33,10 +25,9 @@ services:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
       - WEBUI_PORT=9090
+    env_file:
+      - .shared.env
     volumes:
       - ./apps/qbittorrent:/config
       - /mnt/seagate:/seagate
@@ -50,10 +41,8 @@ services:
   jackett:
     image: lscr.io/linuxserver/jackett:latest
     container_name: jackett
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
+    env_file:
+      - .shared.env
     volumes:
       - ./apps/jackett:/config
       - /home/dani/Downloads:/seagate/downloads
@@ -64,10 +53,8 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
+    env_file:
+      - .shared.env
     volumes:
       - ./apps/sonarr:/config
       - /mnt/seagate:/seagate
@@ -78,16 +65,31 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
+    env_file:
+      - .shared.env
     volumes:
       - ./apps/radarr:/config
       - /mnt/seagate:/seagate
     ports:
       - 7878:7878
     restart: unless-stopped
+
+  unpackerr:
+    image: golift/unpackerr
+    container_name: unpackerr
+    volumes:
+      - /mnt/seagate:/seagate
+      - ./unpackerr:/config
+    environment:
+      - UN_LOG_FILE=/seagate/downloads/unpackerr.log
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_WEBSERVER_METRICS=true
+    env_file:
+      - .shared.env
+      - .secrets.env
+    ports:
+      - 5656:5656
 
   jellyseerr:
      image: fallenbagel/jellyseerr:latest
@@ -105,10 +107,9 @@ services:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Vancouver
       - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    env_file:
+      - .shared.env
     volumes:
       - ./apps/jellyfin:/config
       - /mnt/seagate/media/sonarr:/data/tvshows
@@ -139,10 +140,13 @@ services:
     container_name: watchtower
     environment:
       - WATCHTOWER_SCHEDULE=0 4 * * *
-      - TZ=America/Vancouver
+    env_file:
+      - .shared.env
+      - .secrets.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8080:8080
     command: --cleanup --http-api-metrics --http-api-token ${SECRET_WATCHTOWER_KEY?error}
     restart: unless-stopped
+
