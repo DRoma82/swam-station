@@ -2,6 +2,7 @@
 .secrets.env
 .duck_token
 duck.log
+letsencrypt/
 apps/*
 !apps/homepage/
 apps/homepage/logs

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-docker compose --env-file .secrets down
-docker compose --env-file .secrets pull
+docker compose down
+docker compose pull
 docker system prune -f
-docker compose --env-file .secrets up -d
+docker compose up -d
