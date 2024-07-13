@@ -21,3 +21,6 @@ layout:
     Tools:
       style: row
       icon: mdi-tools
+    System:
+      style: row
+      icon: mdi-server

@@ -5,7 +5,7 @@
 - Apps:
     - Jellyfin:
         icon: jellyfin
-        href: http://10.0.0.240:8096
+        href: https://jellyfin.dannyroma.ca
         description: Media Server
         ping: jellyfin
         server: swam-station-docker
@@ -23,7 +23,7 @@
           expandOneStreamToTwoRows: false # optional, defaults to true
     - Jellyseerr:
         icon: jellyseerr
-        href: http://10.0.0.240:5055
+        href: https://jellyseerr.dannyroma.ca
         description: Media Request Manager
         ping: jellyseerr
         server: swam-station-docker
@@ -31,7 +31,7 @@
         siteMonitor: http://jellyseerr:5055
     - Radarr:
         icon: radarr
-        href: http://10.0.0.240:7878
+        href: https://radarr.dannyroma.ca
         description: Automated Movie Downloader
         ping: radarr
         server: swam-station-docker
@@ -45,7 +45,7 @@
           enableQueue: true
     - Sonarr:
         icon: sonarr
-        href: http://10.0.0.240:8989
+        href: https://sonarr.dannyroma.ca
         description: Automated TV Show Downloader
         ping: sonarr
         server: swam-station-docker
@@ -59,7 +59,7 @@
           enableQueue: true
     - Tinfoil:
         icon: si-nintendoswitch
-        href: http://10.0.0.240:9000
+        href: https://tinfoil.dannyroma.ca
         description: Switch Game Installer
         ping: tinfoil
         server: swam-station-docker
@@ -69,7 +69,7 @@
 - Tools:
     - qBitTorrent:
         icon: qbittorrent
-        href: http://10.0.0.240:9090
+        href: http://torrent.dannyroma.ca
         description: Torrent Download Manager
         ping: qbittorrent
         server: swam-station-docker
@@ -82,7 +82,7 @@
           password: {{HOMEPAGE_VAR_QBIT_PWD}}
     - Jackett:
         icon: mdi-access-point
-        href: http://10.0.0.240:9117
+        href: http://jackett.dannyroma.ca
         description: Torrent Indexer Aggregator
         ping: jackett
         server: swam-station-docker
@@ -92,22 +92,6 @@
           type: jackett
           url: http://jackett:9117
           password: {{HOMEPAGE_VAR_JACKETT_PWD}}
-    - DDClient:
-        icon: mdi-dns
-        description: Dynamic DNS update
-        ping: ddclient
-        server: swam-station-docker
-        container: ddclient
-    - Watchtower:
-        icon: watchtower
-        description: Automated Docker Container Updater
-        ping: watchtower
-        server: swam-station-docker
-        container: watchtower
-        widget:
-          type: watchtower
-          url: http://watchtower:8080
-          key: {{HOMEPAGE_VAR_WATCHTOWER_KEY}}
     - Homepage:
         icon: homepage
         description: This Dashboard
@@ -116,3 +100,31 @@
         container: homepage
         siteMonitor: http://homepage:3000
 
+- System:
+  - Traefik:
+      icon: traefik
+      href: http://traefik.dannyroma.ca
+      description: Reverse Proxy
+      ping: traefik
+      server: swam-station-docker
+      container: traefik
+      siteMonitor: http://traefik:8080
+      widget:
+        type: traefik
+        url: http://traefik:8080
+  - DDClient:
+      icon: mdi-dns
+      description: Dynamic DNS update
+      ping: ddclient
+      server: swam-station-docker
+      container: ddclient
+  - Watchtower:
+      icon: watchtower
+      description: Automated Docker Container Updater
+      ping: watchtower
+      server: swam-station-docker
+      container: watchtower
+      widget:
+        type: watchtower
+        url: http://watchtower:8080
+        key: {{HOMEPAGE_VAR_WATCHTOWER_KEY}}
