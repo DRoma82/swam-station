@@ -50,8 +50,13 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./apps/homepage:/app/config
-      - /mnt/seagate:/mnt/seagate
+      - ./apps/homepage/logs:/app/config/logs
+      - ./homepage/bookmarks.yaml:/app/config/bookmarks.yaml:ro
+      - ./homepage/docker.yaml:/app/config/docker.yaml:ro
+      - ./homepage/services.yaml:/app/config/services.yaml:ro
+      - ./homepage/settings.yaml:/app/config/settings.yaml:ro
+      - ./homepage/widgets.yaml:/app/config/widgets.yaml:ro
+      - /mnt/seagate:/mnt/seagate:ro
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - traefik.enable=true
