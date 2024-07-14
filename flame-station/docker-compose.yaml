@@ -1,0 +1,11 @@
+services:
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    env_file:
+      - ../.shared.env
+      - .secrets.env
+    volumes:
+      - ./ddclient.conf:/config/ddclient.conf
+    restart: unless-stopped
+
