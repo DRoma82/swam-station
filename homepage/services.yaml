@@ -113,7 +113,7 @@
         type: traefik
         url: http://traefik:8080
   - DDClient:
-      icon: mdi-dns
+      icon: cloudflare
       description: Dynamic DNS update
       ping: ddclient
       server: swam-station-docker

@@ -9,12 +9,12 @@ services:
       - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      
+
       - --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entryPoint.to=https
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --entrypoints.web.http.redirections.entrypoint.permanent=true
-      
+
       - --entrypoints.https.address=:443
       - --entrypoints.https.http.tls=true
       - --entrypoints.https.http.tls.certresolver=letsencrypt
@@ -27,10 +27,16 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./letsencrypt:/letsencrypt
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`traefik.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.api.entrypoints=https
+      - traefik.http.routers.api.tls.certresolver=letsencrypt
+      - traefik.http.routers.api.service=api@internal
+      - traefik.http.services.api.loadbalancer.server.port=8080
     restart: unless-stopped
 
   dummy: # dummy container to get a wildcard certificate for the domain
@@ -87,9 +93,15 @@ services:
       - /mnt/seagate:/seagate
       - /home/dani/Downloads:/watch
     ports:
-      - 9090:9090
       - 6881:6881
       - 6881:6881/udp
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.torrent.rule=Host(`torrent.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.torrent.entrypoints=https
+      - traefik.http.routers.torrent.tls.certresolver=letsencrypt
+      - traefik.http.routers.torrent.service=torrent
+      - traefik.http.services.torrent.loadbalancer.server.port=9090
     restart: unless-stopped
 
   jackett:
@@ -102,6 +114,11 @@ services:
       - /home/dani/Downloads:/seagate/downloads
     ports:
       - 9117:9117
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jackett.rule=Host(`jackett.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.jackett.entrypoints=https
+      - traefik.http.routers.jackett.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   sonarr:
@@ -114,6 +131,11 @@ services:
       - /mnt/seagate:/seagate
     ports:
       - 8989:8989
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.sonarr.entrypoints=https
+      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   radarr:
@@ -126,6 +148,11 @@ services:
       - /mnt/seagate:/seagate
     ports:
       - 7878:7878
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`radarr.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.radarr.entrypoints=https
+      - traefik.http.routers.radarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   unpackerr:
@@ -146,16 +173,20 @@ services:
       - 5656:5656
 
   jellyseerr:
-     image: fallenbagel/jellyseerr:latest
-     container_name: jellyseerr
-     environment:
-          - LOG_LEVEL=debug
-     ports:
-          - 5055:5055
-     volumes:
-          - ./apps/jellyseerr:/app/config
-
-     restart: unless-stopped
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+    ports:
+      - 5055:5055
+    volumes:
+      - ./apps/jellyseerr:/app/config
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`jellyseerr.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.jellyseerr.entrypoints=https
+      - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
+    restart: unless-stopped
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
@@ -194,6 +225,13 @@ services:
       - ./tinfoil:/etc/nginx:ro
     ports:
       - 9000:9000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tinfoil.rule=Host(`tinfoil.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.tinfoil.entrypoints=https
+      - traefik.http.routers.tinfoil.tls.certresolver=letsencrypt
+      - traefik.http.routers.tinfoil.service=tinfoil
+      - traefik.http.services.tinfoil.loadbalancer.server.port=9000
     restart: unless-stopped
 
   watchtower:
@@ -206,8 +244,8 @@ services:
       - .secrets.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    # ports:
-    #   - 8080:8080
+      # ports:
+      #   - 8080:8080
     command: --cleanup --http-api-metrics --http-api-token ${SECRET_WATCHTOWER_KEY?error}
     restart: unless-stopped
 
