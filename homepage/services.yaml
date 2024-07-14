@@ -80,18 +80,18 @@
           url: http://qbittorrent:9090
           username: admin
           password: {{HOMEPAGE_VAR_QBIT_PWD}}
-    - Jackett:
-        icon: mdi-access-point
-        href: http://jackett.dannyroma.ca
+    - prowlarr:
+        icon: prowlarr
+        href: http://prowlarr.dannyroma.ca
         description: Torrent Indexer Aggregator
-        ping: jackett
+        ping: prowlarr
         server: swam-station-docker
-        container: jackett
-        siteMonitor: http://jackett:9117
+        container: prowlarr
+        siteMonitor: http://prowlarr:9696
         widget:
-          type: jackett
-          url: http://jackett:9117
-          password: {{HOMEPAGE_VAR_JACKETT_PWD}}
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
     - Homepage:
         icon: homepage
         description: This Dashboard

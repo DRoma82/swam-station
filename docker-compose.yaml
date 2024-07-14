@@ -104,21 +104,20 @@ services:
       - traefik.http.services.torrent.loadbalancer.server.port=9090
     restart: unless-stopped
 
-  jackett:
-    image: lscr.io/linuxserver/jackett:latest
-    container_name: jackett
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
     env_file:
       - .shared.env
     volumes:
-      - ./apps/jackett:/config
-      - /home/dani/Downloads:/seagate/downloads
+      - ./apps/prowlarr:/config
     ports:
-      - 9117:9117
+      - 9696:9696
     labels:
       - traefik.enable=true
-      - traefik.http.routers.jackett.rule=Host(`jackett.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.jackett.entrypoints=https
-      - traefik.http.routers.jackett.tls.certresolver=letsencrypt
+      - traefik.http.routers.prowlarr.rule=Host(`prowlarr.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.prowlarr.entrypoints=https
+      - traefik.http.routers.prowlarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   sonarr:
