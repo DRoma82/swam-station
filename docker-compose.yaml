@@ -187,33 +187,56 @@ services:
       - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:latest
-    container_name: jellyfin
-    environment:
-      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+  # jellyfin:
+  #   image: lscr.io/linuxserver/jellyfin:latest
+  #   container_name: jellyfin
+  #   environment:
+  #     - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+  #   env_file:
+  #     - .shared.env
+  #   volumes:
+  #     - ./apps/jellyfin:/config
+  #     - /mnt/seagate/media/sonarr:/data/tvshows
+  #     - /mnt/seagate/media/radarr:/data/movies
+  #     - /mnt/seagate/media/Bellesa:/data/bellesa
+  #     - ./letsencrypt:/cert
+  #   devices:
+  #     - /dev/dri:/dev/dri
+  #   ports:
+  #     - 8096:8096
+  #     - 7359:7359/udp # discovery
+  #     - 1900:1900/udp # announce
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.jellyfin.rule=Host(`jellyfin.${SECRET_DOMAIN?error}`)
+  #     - traefik.http.routers.jellyfin.entrypoints=https
+  #     - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
+  #     - traefik.http.routers.jellyfin.service=jellyfin
+  #     - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+  #   restart: unless-stopped
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
     env_file:
       - .shared.env
+    network_mode: host
+    environment:
+      - VERSION=docker
+      - PLEX_CLAIM= #optional
     volumes:
-      - ./apps/jellyfin:/config
+      - ./apps/plex:/config
       - /mnt/seagate/media/sonarr:/data/tvshows
       - /mnt/seagate/media/radarr:/data/movies
       - /mnt/seagate/media/Bellesa:/data/bellesa
-      - /mnt/seagate/media/readarr:/data/books
       - ./letsencrypt:/cert
-    devices:
-      - /dev/dri:/dev/dri
-    ports:
-      - 8096:8096
-      - 7359:7359/udp # discovery
-      - 1900:1900/udp # announce
     labels:
       - traefik.enable=true
-      - traefik.http.routers.jellyfin.rule=Host(`jellyfin.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.jellyfin.entrypoints=https
-      - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
-      - traefik.http.routers.jellyfin.service=jellyfin
-      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+      - traefik.http.routers.plex.rule=Host(`plex.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.plex.entrypoints=https
+      - traefik.http.routers.plex.tls.certresolver=letsencrypt
+      - traefik.http.routers.plex.service=plex
+      - traefik.http.services.plex.loadbalancer.server.port=32400
     restart: unless-stopped
 
   tinfoil:
