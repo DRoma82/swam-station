@@ -1,4 +1,12 @@
 services:
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    env_file:
+      - .secrets.env
+    command: tunnel run --token ${SECRET_CLOUDFLARE_TOKEN?error}
+    restart: unless-stopped
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
@@ -122,6 +130,19 @@ services:
       - .secrets.env
     ports:
       - 5656:5656
+      
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/bazarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 6767:6767
+    restart: unless-stopped
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
@@ -138,6 +159,34 @@ services:
       - traefik.http.routers.jellyseerr.entrypoints=https
       - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
     restart: unless-stopped
+    
+    
+  tdarr:
+    container_name: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: unless-stopped
+    ports:
+      - 8265:8265 # webUI port
+    env_file:
+      - .shared.env
+    environment:
+      - UMASK_SET=002
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=6
+      - nodeName=MyInternalNode
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./apps/tdarr/server:/app/server
+      - ./apps/tdarr/configs:/app/configs
+      - ./apps/tdarr/logs:/app/logs
+      - /mnt/seagate/media:/media
+      - /mnt/seagate/transcode_cache:/temp
+    devices:
+      - /dev/dri:/dev/dri
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
@@ -183,6 +232,14 @@ services:
       - traefik.http.routers.tinfoil.tls.certresolver=letsencrypt
       - traefik.http.routers.tinfoil.service=tinfoil
       - traefik.http.services.tinfoil.loadbalancer.server.port=9000
+    restart: unless-stopped
+
+  yt-music-download:
+    build: ./apps/YtMusicDownload
+    ports:
+      - "8013:8013"
+    environment:
+      - FLASK_ENV=production
     restart: unless-stopped
 
   # obsidian:
