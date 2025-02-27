@@ -1,0 +1,26 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+title: The Swam Station
+theme: dark
+color: violet
+background: 
+  image: https://static.wikia.nocookie.net/lostpedia/images/b/b9/2x01-InsideTheHatch.jpg
+  blur: md # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+  saturate: 50 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+  brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+  opacity: 65 # 0-100
+
+headerStyle: boxed
+showStats: true
+
+layout:
+    Apps:
+      style: row
+      icon: mdi-application-brackets
+    Tools:
+      style: row
+      icon: mdi-tools
+    System:
+      style: row
+      icon: mdi-server

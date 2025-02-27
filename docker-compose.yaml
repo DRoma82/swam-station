@@ -1,0 +1,292 @@
+services:
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    env_file:
+      - .secrets.env
+    ports:
+      - 3000:3000
+    volumes:
+      - ./apps/homepage/logs:/app/config/logs
+      - ./homepage/bookmarks.yaml:/app/config/bookmarks.yaml:ro
+      - ./homepage/docker.yaml:/app/config/docker.yaml:ro
+      - ./homepage/services.yaml:/app/config/services.yaml:ro
+      - ./homepage/settings.yaml:/app/config/settings.yaml:ro
+      - ./homepage/widgets.yaml:/app/config/widgets.yaml:ro
+      - /mnt/seagate:/mnt/seagate:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.homepage.rule=Host(`hp.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.homepage.entrypoints=https       
+      - traefik.http.routers.homepage.tls.certresolver=letsencrypt
+    restart: unless-stopped
+
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    env_file:
+      - .shared.env
+      - .secrets.env
+    volumes:
+      - ./ddclient:/config
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - WEBUI_PORT=9090
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/qbittorrent:/config
+      - /mnt/seagate:/seagate
+      - /home/dani/Downloads:/watch
+    ports:
+      - 9090:9090
+      - 6881:6881
+      - 6881:6881/udp
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.torrent.rule=Host(`bt.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.torrent.entrypoints=https
+      - traefik.http.routers.torrent.tls.certresolver=letsencrypt
+      - traefik.http.routers.torrent.service=torrent
+      - traefik.http.services.torrent.loadbalancer.server.port=9090
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/prowlarr:/config
+    ports:
+      - 9696:9696
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prowlarr.rule=Host(`pl.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.prowlarr.entrypoints=https
+      - traefik.http.routers.prowlarr.tls.certresolver=letsencrypt
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/sonarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 8989:8989
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sn.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.sonarr.entrypoints=https
+      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/radarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 7878:7878
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`rd.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.radarr.entrypoints=https
+      - traefik.http.routers.radarr.tls.certresolver=letsencrypt
+    restart: unless-stopped
+
+  unpackerr:
+    image: golift/unpackerr
+    container_name: unpackerr
+    volumes:
+      - /mnt/seagate:/seagate
+      - ./unpackerr:/config
+    environment:
+      - UN_LOG_FILE=/seagate/downloads/unpackerr.log
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_WEBSERVER_METRICS=true
+    env_file:
+      - .shared.env
+      - .secrets.env
+    ports:
+      - 5656:5656
+      
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/bazarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+    ports:
+      - 5055:5055
+    volumes:
+      - ./apps/jellyseerr:/app/config
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`js.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.jellyseerr.entrypoints=https
+      - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
+    restart: unless-stopped
+    
+    
+  tdarr:
+    container_name: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: unless-stopped
+    ports:
+      - 8265:8265 # webUI port
+    env_file:
+      - .shared.env
+    environment:
+      - UMASK_SET=002
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=6
+      - nodeName=MyInternalNode
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - ./apps/tdarr/server:/app/server
+      - ./apps/tdarr/configs:/app/configs
+      - ./apps/tdarr/logs:/app/logs
+      - /mnt/seagate/media:/media
+      - /mnt/seagate/transcode_cache:/temp
+    devices:
+      - /dev/dri:/dev/dri
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/jellyfin:/config
+      - /mnt/seagate/media/sonarr:/data/tvshows
+      - /mnt/seagate/media/radarr:/data/movies
+      - /mnt/seagate/media/Bellesa:/data/bellesa
+      - ./letsencrypt:/cert
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 7359:7359/udp # discovery
+      - 1900:1900/udp # announce
+    labels:
+      - traefik.enable=false
+      - traefik.http.routers.jellyfin.rule=Host(`jf.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.jellyfin.entrypoints=https
+      - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
+      - traefik.http.routers.jellyfin.service=jellyfin
+      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+    restart: unless-stopped
+
+  tinfoil:
+    image: nginx:alpine
+    container_name: tinfoil
+    volumes:
+      - /mnt/seagate/tinfoil:/usr/share/nginx/html/:ro
+      - ./tinfoil:/etc/nginx:ro
+    ports:
+      - 9000:9000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tinfoil.rule=Host(`tf.${SECRET_DOMAIN?error}`)
+      - traefik.http.routers.tinfoil.entrypoints=https
+      - traefik.http.routers.tinfoil.tls.certresolver=letsencrypt
+      - traefik.http.routers.tinfoil.service=tinfoil
+      - traefik.http.services.tinfoil.loadbalancer.server.port=9000
+    restart: unless-stopped
+
+  yt-music-download:
+    build: ./apps/YtMusicDownload
+    ports:
+      - "8013:8013"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  curious:
+    build: ./apps/curious
+    env_file:
+      - .shared.env
+    devices:
+      - /dev/snd:/dev/snd  # Map sound devices
+    volumes:
+      - ./apps/curious/curious:/app/curious  # Map recordings directory
+      - ./apps/curious/curious_recorder.log:/app/curious_recorder.log  # Map log file
+      - ./apps/curious/mic_config.json:/app/mic_config.json  # Map mic config
+      - /etc/asound.conf:/etc/asound.conf:ro  # Map ALSA config
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    privileged: true  # This gives access to audio devices
+    group_add:
+      - audio
+      - video
+
+  # obsidian:
+  #   image: lscr.io/linuxserver/obsidian:latest
+  #   container_name: obsidian
+  #   env_file:
+  #     - .shared.env
+  #   volumes:
+  #     - ./apps/obsidian:/config
+  #     - ~/obsidian:/data
+  #   ports:
+  #     - 8000:3000
+  #     - 8001:3001
+  #   devices:
+  #     - /dev/dri:/dev/dri #optional
+  #   shm_size: "1gb"
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.obsidian.rule=Host(`ob.${SECRET_DOMAIN?error}`)
+  #     - traefik.http.routers.obsidian.entrypoints=https
+  #     - traefik.http.routers.obsidian.tls.certresolver=letsencrypt
+  #   restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_SCHEDULE=0 4 * * *
+    env_file:
+      - .shared.env
+      - .secrets.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # ports:
+      #   - 8080:8080
+    command: --cleanup --http-api-metrics --http-api-token ${SECRET_WATCHTOWER_KEY?error}
+    restart: unless-stopped
+

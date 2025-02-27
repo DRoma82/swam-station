@@ -1,0 +1,130 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/services
+
+- Apps:
+    - Jellyfin:
+        icon: jellyfin
+        href: https://dannyroma.ca:8096
+        description: Media Server
+        ping: jellyfin
+        server: swam-station-docker
+        container: jellyfin
+        siteMonitor: http://jellyfin:8096
+        widget:
+          type: jellyfin
+          url: http://jellyfin:8096
+          key: {{HOMEPAGE_VAR_JELLYFIN_KEY}}
+          fields: ["movies", "series", "episodes"]
+          enableBlocks: true # optional, defaults to false
+          enableNowPlaying: true # optional, defaults to true
+          enableUser: true # optional, defaults to false
+          showEpisodeNumber: true # optional, defaults to false
+          expandOneStreamToTwoRows: false # optional, defaults to true
+    - Jellyseerr:
+        icon: jellyseerr
+        href: https://js.dannyroma.ca
+        description: Media Request Manager
+        ping: jellyseerr
+        server: swam-station-docker
+        container: jellyseerr
+        siteMonitor: http://jellyseerr:5055
+    - Radarr:
+        icon: radarr
+        href: https://rd.dannyroma.ca
+        description: Automated Movie Downloader
+        ping: radarr
+        server: swam-station-docker
+        container: radarr
+        siteMonitor: http://radarr:7878
+        widget:
+          type: radarr
+          url: http://10.0.0.240:7878
+          key: {{HOMEPAGE_VAR_RADARR_KEY}}
+          fields: ["wanted", "missing", "queued"]
+          enableQueue: true
+    - Sonarr:
+        icon: sonarr
+        href: https://sn.dannyroma.ca
+        description: Automated TV Show Downloader
+        ping: sonarr
+        server: swam-station-docker
+        container: sonarr
+        siteMonitor: http://sonarr:8989
+        widget:
+          type: sonarr
+          url: http://10.0.0.240:8989
+          key: {{HOMEPAGE_VAR_SONARR_KEY}}
+          fields: ["wanted", "missing", "queued"]
+          enableQueue: true
+    - Tinfoil:
+        icon: si-nintendoswitch
+        href: https://tf.dannyroma.ca
+        description: Switch Game Installer
+        ping: tinfoil
+        server: swam-station-docker
+        container: tinfoil
+        siteMonitor: http://tinfoil:9000
+
+- Tools:
+    - qBitTorrent:
+        icon: qbittorrent
+        href: http://bt.dannyroma.ca
+        description: Torrent Download Manager
+        ping: qbittorrent
+        server: swam-station-docker
+        container: qbittorrent
+        siteMonitor: http://qbittorrent:9090
+        widget:
+          type: qbittorrent
+          url: http://qbittorrent:9090
+          username: admin
+          password: {{HOMEPAGE_VAR_QBIT_PWD}}
+    - prowlarr:
+        icon: prowlarr
+        href: http://pl.dannyroma.ca
+        description: Torrent Indexer Aggregator
+        ping: prowlarr
+        server: swam-station-docker
+        container: prowlarr
+        siteMonitor: http://prowlarr:9696
+        widget:
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
+    - Homepage:
+        icon: homepage
+        description: This Dashboard
+        ping: homepage
+        server: swam-station-docker
+        container: homepage
+        siteMonitor: http://homepage:3000
+
+- System:
+  - Traefik:
+      icon: traefik
+      href: http://tf.dannyroma.ca
+      description: Reverse Proxy
+      ping: traefik
+      server: swam-station-docker
+      container: traefik
+      siteMonitor: http://traefik:8080
+      widget:
+        type: traefik
+        url: http://traefik:8080
+  - DDClient:
+      icon: cloudflare
+      description: Dynamic DNS update
+      ping: ddclient
+      server: swam-station-docker
+      container: ddclient
+  - Watchtower:
+      icon: watchtower
+      description: Automated Docker Container Updater
+      ping: watchtower
+      server: swam-station-docker
+      container: watchtower
+      widget:
+        type: watchtower
+        url: http://watchtower:8080
+        key: {{HOMEPAGE_VAR_WATCHTOWER_KEY}}

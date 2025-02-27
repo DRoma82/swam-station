@@ -1,0 +1,24 @@
+services:
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    env_file:
+      - ../.shared.env
+      - .secrets.env
+    volumes:
+      - ./ddclient.conf:/config/ddclient.conf
+    restart: unless-stopped
+
+    pihole:
+      image: pihole/pihole:latest
+      container_name: pihole
+      env_file:
+        - ../.shared.env
+        - .secrets.env
+      environment:
+        WEBPASSWORD: ${PIHOLE_PWD?error}
+      ports:
+        - 53:53/tcp
+        - 53:53/udp
+        - 8080:80
+      restart: unless-stopped

@@ -1,0 +1,8 @@
+.env
+.secrets.env
+.duck_token
+duck.log
+letsencrypt/
+apps/
+.htpasswd
+jellyfin-tizen/
