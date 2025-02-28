@@ -235,25 +235,6 @@ services:
       - FLASK_ENV=production
     restart: unless-stopped
 
-  curious:
-    build: ./apps/curious
-    env_file:
-      - .shared.env
-    devices:
-      - /dev/snd:/dev/snd  # Map sound devices
-    volumes:
-      - ./apps/curious/curious:/app/curious  # Map recordings directory
-      - ./apps/curious/curious_recorder.log:/app/curious_recorder.log  # Map log file
-      - ./apps/curious/mic_config.json:/app/mic_config.json  # Map mic config
-      - /etc/asound.conf:/etc/asound.conf:ro  # Map ALSA config
-    environment:
-      - PYTHONUNBUFFERED=1
-    restart: unless-stopped
-    privileged: true  # This gives access to audio devices
-    group_add:
-      - audio
-      - video
-
   # obsidian:
   #   image: lscr.io/linuxserver/obsidian:latest
   #   container_name: obsidian
