@@ -1,5 +1,18 @@
 services:
 
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/nginx-proxy-manager:/data
+      - ./letsencrypt:/etc/letsencrypt
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
@@ -30,7 +43,7 @@ services:
       - .shared.env
       - .secrets.env
     volumes:
-      - ./ddclient:/config
+      - ./apps/ddclient:/config
     restart: unless-stopped
 
   qbittorrent:

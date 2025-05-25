@@ -5,4 +5,4 @@ duck.log
 letsencrypt/
 apps/
 .htpasswd
-jellyfin-tizen/
+yt_dlp_update.log
