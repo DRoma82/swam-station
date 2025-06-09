@@ -5,7 +5,7 @@
 - Apps:
     - Jellyfin:
         icon: jellyfin
-        href: https://dannyroma.ca:8096
+        href: https://jellyfin.dannyroma.ca
         description: Media Server
         ping: jellyfin
         server: swam-station-docker
@@ -23,7 +23,7 @@
           expandOneStreamToTwoRows: false # optional, defaults to true
     - Jellyseerr:
         icon: jellyseerr
-        href: https://js.dannyroma.ca
+        href: https://jellyseerr.dannyroma.ca
         description: Media Request Manager
         ping: jellyseerr
         server: swam-station-docker
@@ -31,7 +31,7 @@
         siteMonitor: http://jellyseerr:5055
     - Radarr:
         icon: radarr
-        href: https://rd.dannyroma.ca
+        href: https://radarr.dannyroma.ca
         description: Automated Movie Downloader
         ping: radarr
         server: swam-station-docker
@@ -39,13 +39,13 @@
         siteMonitor: http://radarr:7878
         widget:
           type: radarr
-          url: http://10.0.0.240:7878
+          url: http://radarr:7878
           key: {{HOMEPAGE_VAR_RADARR_KEY}}
           fields: ["wanted", "missing", "queued"]
           enableQueue: true
     - Sonarr:
         icon: sonarr
-        href: https://sn.dannyroma.ca
+        href: https://sonarr.dannyroma.ca
         description: Automated TV Show Downloader
         ping: sonarr
         server: swam-station-docker
@@ -53,7 +53,7 @@
         siteMonitor: http://sonarr:8989
         widget:
           type: sonarr
-          url: http://10.0.0.240:8989
+          url: http://sonarr:8989
           key: {{HOMEPAGE_VAR_SONARR_KEY}}
           fields: ["wanted", "missing", "queued"]
           enableQueue: true
@@ -69,7 +69,7 @@
 - Tools:
     - qBitTorrent:
         icon: qbittorrent
-        href: http://bt.dannyroma.ca
+        href: http://qbit.dannyroma.ca
         description: Torrent Download Manager
         ping: qbittorrent
         server: swam-station-docker
@@ -82,7 +82,7 @@
           password: {{HOMEPAGE_VAR_QBIT_PWD}}
     - prowlarr:
         icon: prowlarr
-        href: http://pl.dannyroma.ca
+        href: http://prowlarr.dannyroma.ca
         description: Torrent Indexer Aggregator
         ping: prowlarr
         server: swam-station-docker
@@ -101,17 +101,19 @@
         siteMonitor: http://homepage:3000
 
 - System:
-  - Traefik:
-      icon: traefik
-      href: http://tf.dannyroma.ca
+  - Nginx Proxy Manager:
+      icon: nginx
+      href: http://nginx.dannyroma.ca
       description: Reverse Proxy
-      ping: traefik
+      ping: npm
       server: swam-station-docker
-      container: traefik
-      siteMonitor: http://traefik:8080
+      container: npm
+      siteMonitor: http://npm:81
       widget:
-        type: traefik
-        url: http://traefik:8080
+        type: npm
+        url: http://npm:81
+        username: {{HOMEPAGE_VAR_NPM_USER}}
+        password: {{HOMEPAGE_VAR_NPM_PWD}}
   - DDClient:
       icon: cloudflare
       description: Dynamic DNS update

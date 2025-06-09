@@ -1,7 +1,8 @@
 services:
 
-  nginx-proxy-manager:
+  npm:
     image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm
     restart: unless-stopped
     ports:
       - '80:80'
@@ -18,6 +19,8 @@ services:
     container_name: homepage
     env_file:
       - .secrets.env
+    environment:
+      - HOMEPAGE_ALLOWED_HOSTS=home.${SECRET_DOMAIN?error}
     ports:
       - 3000:3000
     volumes:
@@ -29,11 +32,6 @@ services:
       - ./homepage/widgets.yaml:/app/config/widgets.yaml:ro
       - /mnt/seagate:/mnt/seagate:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.homepage.rule=Host(`hp.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.homepage.entrypoints=https       
-      - traefik.http.routers.homepage.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   ddclient:
@@ -61,14 +59,6 @@ services:
       - 9090:9090
       - 6881:6881
       - 6881:6881/udp
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.torrent.rule=Host(`bt.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.torrent.entrypoints=https
-      - traefik.http.routers.torrent.tls.certresolver=letsencrypt
-      - traefik.http.routers.torrent.service=torrent
-      - traefik.http.services.torrent.loadbalancer.server.port=9090
-    restart: unless-stopped
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -79,11 +69,6 @@ services:
       - ./apps/prowlarr:/config
     ports:
       - 9696:9696
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.prowlarr.rule=Host(`pl.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.prowlarr.entrypoints=https
-      - traefik.http.routers.prowlarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   sonarr:
@@ -96,11 +81,6 @@ services:
       - /mnt/seagate:/seagate
     ports:
       - 8989:8989
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.sonarr.rule=Host(`sn.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.sonarr.entrypoints=https
-      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   radarr:
@@ -113,11 +93,6 @@ services:
       - /mnt/seagate:/seagate
     ports:
       - 7878:7878
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.radarr.rule=Host(`rd.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.radarr.entrypoints=https
-      - traefik.http.routers.radarr.tls.certresolver=letsencrypt
     restart: unless-stopped
 
   unpackerr:
@@ -159,41 +134,8 @@ services:
       - 5055:5055
     volumes:
       - ./apps/jellyseerr:/app/config
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.jellyseerr.rule=Host(`js.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.jellyseerr.entrypoints=https
-      - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
     restart: unless-stopped
     
-    
-  tdarr:
-    container_name: tdarr
-    image: ghcr.io/haveagitgat/tdarr:latest
-    restart: unless-stopped
-    ports:
-      - 8265:8265 # webUI port
-    env_file:
-      - .shared.env
-    environment:
-      - UMASK_SET=002
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-      - inContainer=true
-      - ffmpegVersion=6
-      - nodeName=MyInternalNode
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=all
-    volumes:
-      - ./apps/tdarr/server:/app/server
-      - ./apps/tdarr/configs:/app/configs
-      - ./apps/tdarr/logs:/app/logs
-      - /mnt/seagate/media:/media
-      - /mnt/seagate/transcode_cache:/temp
-    devices:
-      - /dev/dri:/dev/dri
-
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
@@ -214,13 +156,6 @@ services:
       - 8920:8920
       - 7359:7359/udp # discovery
       - 1900:1900/udp # announce
-    labels:
-      - traefik.enable=false
-      - traefik.http.routers.jellyfin.rule=Host(`jf.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.jellyfin.entrypoints=https
-      - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
-      - traefik.http.routers.jellyfin.service=jellyfin
-      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
     restart: unless-stopped
 
   tinfoil:
@@ -231,13 +166,6 @@ services:
       - ./tinfoil:/etc/nginx:ro
     ports:
       - 9000:9000
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.tinfoil.rule=Host(`tf.${SECRET_DOMAIN?error}`)
-      - traefik.http.routers.tinfoil.entrypoints=https
-      - traefik.http.routers.tinfoil.tls.certresolver=letsencrypt
-      - traefik.http.routers.tinfoil.service=tinfoil
-      - traefik.http.services.tinfoil.loadbalancer.server.port=9000
     restart: unless-stopped
 
   yt-music-download:
@@ -262,11 +190,6 @@ services:
   #   devices:
   #     - /dev/dri:/dev/dri #optional
   #   shm_size: "1gb"
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.obsidian.rule=Host(`ob.${SECRET_DOMAIN?error}`)
-  #     - traefik.http.routers.obsidian.entrypoints=https
-  #     - traefik.http.routers.obsidian.tls.certresolver=letsencrypt
   #   restart: unless-stopped
 
   watchtower:

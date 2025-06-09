@@ -3,7 +3,7 @@
 # https://gethomepage.dev/latest/configs/settings
 title: The Swam Station
 theme: dark
-color: violet
+color: teal
 background: 
   image: https://static.wikia.nocookie.net/lostpedia/images/b/b9/2x01-InsideTheHatch.jpg
   blur: md # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
