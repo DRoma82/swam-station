@@ -59,6 +59,7 @@ services:
       - 9090:9090
       - 6881:6881
       - 6881:6881/udp
+    restart: unless-stopped
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -111,6 +112,7 @@ services:
       - .secrets.env
     ports:
       - 5656:5656
+    restart: unless-stopped
       
 
   bazarr:
@@ -148,6 +150,7 @@ services:
       - /mnt/seagate/media/sonarr:/data/tvshows
       - /mnt/seagate/media/radarr:/data/movies
       - /mnt/seagate/media/Bellesa:/data/bellesa
+      - /mnt/seagate/media/Masterclass:/data/masterclass
       - ./letsencrypt:/cert
     devices:
       - /dev/dri:/dev/dri
