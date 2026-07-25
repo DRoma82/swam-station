@@ -78,7 +78,7 @@
         widget:
           type: qbittorrent
           url: http://qbittorrent:9090
-          username: admin
+          username: dani
           password: {{HOMEPAGE_VAR_QBIT_PWD}}
     - prowlarr:
         icon: prowlarr

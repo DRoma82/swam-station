@@ -7,4 +7,5 @@
 #   port: 2375
 
 swam-station-docker:
-  socket: /var/run/docker.sock
+  host: docker-socket-proxy
+  port: 2375
