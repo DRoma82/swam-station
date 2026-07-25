@@ -1,0 +1,322 @@
+services:
+
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/nginx-proxy-manager:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    env_file:
+      - .secrets.env
+    environment:
+      - HOMEPAGE_ALLOWED_HOSTS=home.${SECRET_DOMAIN?error}
+    ports:
+      - 3000:3000
+    volumes:
+      - ./apps/homepage/logs:/app/config/logs
+      - ./homepage/bookmarks.yaml:/app/config/bookmarks.yaml:ro
+      - ./homepage/docker.yaml:/app/config/docker.yaml:ro
+      - ./homepage/services.yaml:/app/config/services.yaml:ro
+      - ./homepage/settings.yaml:/app/config/settings.yaml:ro
+      - ./homepage/widgets.yaml:/app/config/widgets.yaml:ro
+      - /mnt/seagate:/mnt/seagate:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:latest
+    container_name: ddclient
+    env_file:
+      - .shared.env
+      - .secrets.env
+    volumes:
+      - ./apps/ddclient:/config
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - WEBUI_PORT=9090
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/qbittorrent:/config
+      - /mnt/seagate:/seagate
+      - /home/dani/Downloads:/watch
+    ports:
+      - 9090:9090
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/prowlarr:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/sonarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/radarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  unpackerr:
+    image: golift/unpackerr
+    container_name: unpackerr
+    volumes:
+      - /mnt/seagate:/seagate
+      - ./unpackerr:/config
+    environment:
+      - UN_LOG_FILE=/seagate/downloads/unpackerr.log
+      - UN_SONARR_0_URL=http://sonarr:8989
+      - UN_RADARR_0_URL=http://radarr:7878
+      - UN_WEBSERVER_METRICS=true
+    env_file:
+      - .shared.env
+      - .secrets.env
+    ports:
+      - 5656:5656
+    restart: unless-stopped
+      
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/bazarr:/config
+      - /mnt/seagate:/seagate
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+    ports:
+      - 5055:5055
+    volumes:
+      - ./apps/jellyseerr:/app/config
+    restart: unless-stopped
+    
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/jellyfin:/config
+      - /mnt/seagate/media/sonarr:/data/tvshows
+      - /mnt/seagate/media/radarr:/data/movies
+      - /mnt/seagate/media/Bellesa:/data/bellesa
+      - /mnt/seagate/media/Masterclass:/data/masterclass
+      - ./letsencrypt:/cert
+      - /usr/bin/whisper-cli:/usr/bin/whisper-cli:ro
+      - /mnt/seagate/WhisperModels:/WhisperModels:ro
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 7359:7359/udp # discovery
+      - 1900:1900/udp # announce
+    restart: unless-stopped
+
+  jellystat-db:
+    image: 'postgres:15.2'
+    shm_size: 1gb
+    container_name: jellystat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - './apps/jellystat-db:/var/lib/postgresql/data'
+
+  jellystat:
+    image: 'cyfershepard/jellystat:latest'
+    container_name: jellystat
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: my-secret-jwt-key
+      TZ: mytimezone
+    volumes:
+      - './apps/jellystat/backup:/app/backend/backup-data'
+    ports:
+      - '3002:3000'
+    depends_on:
+      - jellystat-db
+
+  tracearr:
+    image: ghcr.io/connorgallopo/tracearr:supervised
+    container_name: tracearr
+    shm_size: 512mb  # Required for PostgreSQL shared memory (increase for large imports)
+    mem_limit: 3g    # Minimum 3GB required (PostgreSQL + Redis + Node.js)
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536  # TimescaleDB chunks require many file descriptors
+    ports:
+      - "3001:3000"
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/tracearr/postgres:/data/postgres
+      - ./apps/tracearr/redis:/data/redis
+      - ./apps/tracearr/data:/data/tracearr
+      - ./apps/tracearr/backups:/data/backup
+    restart: unless-stopped
+
+  streamystats:
+    image: ghcr.io/fredrikburmester/streamystats-aio:${VERSION:-latest}
+    container_name: streamystats
+    ports:
+      - "3003:3000"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-streamystats}
+      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@localhost:5432/${POSTGRES_DB:-streamystats}
+      - SESSION_SECRET=secret
+      # Stable encryption key for server action closures (prevents session breakage on redeploy)
+      - NODE_ENV=production
+      # Job server cron configuration (optional)
+      - SESSION_POLL_INTERVAL_MS=${SESSION_POLL_INTERVAL_MS:-5000}
+      - CRON_ACTIVITY_SYNC=${CRON_ACTIVITY_SYNC:-*/1 * * * *}
+      - CRON_RECENT_ITEMS_SYNC=${CRON_RECENT_ITEMS_SYNC:-*/1 * * * *}
+      - CRON_USER_SYNC=${CRON_USER_SYNC:-*/1 * * * *}
+      - CRON_PEOPLE_SYNC=${CRON_PEOPLE_SYNC:-*/15 * * * *}
+      - CRON_EMBEDDINGS_SYNC=${CRON_EMBEDDINGS_SYNC:-*/15 * * * *}
+      - CRON_GEOLOCATION_SYNC=${CRON_GEOLOCATION_SYNC:-*/5 * * * *}
+      - CRON_FINGERPRINT_SYNC=${CRON_FINGERPRINT_SYNC:-0 4 * * *}
+      - CRON_JOB_CLEANUP=${CRON_JOB_CLEANUP:-*/1 * * * *}
+      - CRON_OLD_JOB_CLEANUP=${CRON_OLD_JOB_CLEANUP:-0 3 * * *}
+      - CRON_FULL_SYNC=${CRON_FULL_SYNC:-0 2 * * *}
+      - CRON_DELETED_ITEMS_CLEANUP=${CRON_DELETED_ITEMS_CLEANUP:-0 * * * *}
+      # Skip full sync on server startup (set to "true" or "1" to skip)
+      - SKIP_STARTUP_FULL_SYNC=${SKIP_STARTUP_FULL_SYNC:-false}
+    volumes:
+      - ./apps/streamystats/data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  reclaimerr:
+    image: ghcr.io/jessielw/reclaimerr:latest
+    container_name: reclaimerr
+    restart: unless-stopped
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/reclaimerr:/app/data
+    ports:
+      - "8000:8000"
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    env_file:
+      - .shared.env
+    volumes:
+      - ./apps/homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    ports:
+      - 8123:8123
+    restart: unless-stopped
+
+  tinfoil:
+    image: nginx:alpine
+    container_name: tinfoil
+    volumes:
+      - /mnt/seagate/tinfoil:/usr/share/nginx/html/:ro
+      - ./tinfoil:/etc/nginx:ro
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+
+  yt-music-download:
+    build: ./apps/YtMusicDownload
+    container_name: yt-music-download
+    ports:
+      - "8013:8013"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  # obsidian:
+  #   image: lscr.io/linuxserver/obsidian:latest
+  #   container_name: obsidian
+  #   env_file:
+  #     - .shared.env
+  #   volumes:
+  #     - ./apps/obsidian:/config
+  #     - ~/obsidian:/data
+  #   ports:
+  #     - 8000:3000
+  #     - 8001:3001
+  #   devices:
+  #     - /dev/dri:/dev/dri #optional
+  #   shm_size: "1gb"
+  #   restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    environment:
+      - WATCHTOWER_SCHEDULE=0 4 * * *
+    env_file:
+      - .shared.env
+      - .secrets.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # ports:
+      #   - 8080:8080
+    command: --cleanup --http-api-metrics --http-api-token ${SECRET_WATCHTOWER_KEY?error}
+    restart: unless-stopped
+
