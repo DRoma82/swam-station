@@ -93,7 +93,7 @@
           url: http://prowlarr:9696
           key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
     - Home Assistant:
-        icon: homeassistant
+        icon: home-assistant
         href: http://ha.dannyroma.ca
         description: Home Automation
         ping: host.docker.internal

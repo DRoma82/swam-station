@@ -5,7 +5,7 @@ title: The Swam Station
 theme: dark
 color: teal
 background: 
-  image: https://static.wikia.nocookie.net/lostpedia/images/b/b9/2x01-InsideTheHatch.jpg
+  image: /images/inside-the-hatch.webp
   blur: md # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
   saturate: 50 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
   brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness

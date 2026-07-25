@@ -32,6 +32,7 @@ services:
       - ./homepage/services.yaml:/app/config/services.yaml:ro
       - ./homepage/settings.yaml:/app/config/settings.yaml:ro
       - ./homepage/widgets.yaml:/app/config/widgets.yaml:ro
+      - ./homepage/images:/app/public/images:ro
       - /mnt/seagate:/mnt/seagate:ro
     restart: unless-stopped
 
