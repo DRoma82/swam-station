@@ -68,7 +68,6 @@ services:
     volumes:
       - ./apps/qbittorrent:/config
       - /mnt/seagate:/seagate
-      - /home/dani/Downloads:/watch
     ports:
       - 9090:9090
       - 6881:6881
