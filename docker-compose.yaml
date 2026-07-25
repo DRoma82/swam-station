@@ -143,8 +143,8 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
-    environment:
-      - LOG_LEVEL=debug
+    env_file:
+      - .shared.env
     ports:
       - 5055:5055
     volumes:
@@ -172,89 +172,6 @@ services:
       - 8096:8096
       - 8920:8920
       - 7359:7359/udp # discovery
-    restart: unless-stopped
-
-  jellystat-db:
-    image: 'postgres:15.2'
-    shm_size: 1gb
-    container_name: jellystat-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - './apps/jellystat-db:/var/lib/postgresql/data'
-
-  jellystat:
-    image: 'cyfershepard/jellystat:latest'
-    container_name: jellystat
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_IP: jellystat-db
-      POSTGRES_PORT: 5432
-      JWT_SECRET: my-secret-jwt-key
-      TZ: mytimezone
-    volumes:
-      - './apps/jellystat/backup:/app/backend/backup-data'
-    ports:
-      - '3002:3000'
-    depends_on:
-      - jellystat-db
-
-  tracearr:
-    image: ghcr.io/connorgallopo/tracearr:supervised
-    container_name: tracearr
-    shm_size: 512mb  # Required for PostgreSQL shared memory (increase for large imports)
-    mem_limit: 3g    # Minimum 3GB required (PostgreSQL + Redis + Node.js)
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536  # TimescaleDB chunks require many file descriptors
-    ports:
-      - "3001:3000"
-    env_file:
-      - .shared.env
-    volumes:
-      - ./apps/tracearr/postgres:/data/postgres
-      - ./apps/tracearr/redis:/data/redis
-      - ./apps/tracearr/data:/data/tracearr
-      - ./apps/tracearr/backups:/data/backup
-    restart: unless-stopped
-
-  streamystats:
-    image: ghcr.io/fredrikburmester/streamystats-aio:${VERSION:-latest}
-    container_name: streamystats
-    ports:
-      - "3003:3000"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-streamystats}
-      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
-      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@localhost:5432/${POSTGRES_DB:-streamystats}
-      - SESSION_SECRET=secret
-      # Stable encryption key for server action closures (prevents session breakage on redeploy)
-      - NODE_ENV=production
-      # Job server cron configuration (optional)
-      - SESSION_POLL_INTERVAL_MS=${SESSION_POLL_INTERVAL_MS:-5000}
-      - CRON_ACTIVITY_SYNC=${CRON_ACTIVITY_SYNC:-*/1 * * * *}
-      - CRON_RECENT_ITEMS_SYNC=${CRON_RECENT_ITEMS_SYNC:-*/1 * * * *}
-      - CRON_USER_SYNC=${CRON_USER_SYNC:-*/1 * * * *}
-      - CRON_PEOPLE_SYNC=${CRON_PEOPLE_SYNC:-*/15 * * * *}
-      - CRON_EMBEDDINGS_SYNC=${CRON_EMBEDDINGS_SYNC:-*/15 * * * *}
-      - CRON_GEOLOCATION_SYNC=${CRON_GEOLOCATION_SYNC:-*/5 * * * *}
-      - CRON_FINGERPRINT_SYNC=${CRON_FINGERPRINT_SYNC:-0 4 * * *}
-      - CRON_JOB_CLEANUP=${CRON_JOB_CLEANUP:-*/1 * * * *}
-      - CRON_OLD_JOB_CLEANUP=${CRON_OLD_JOB_CLEANUP:-0 3 * * *}
-      - CRON_FULL_SYNC=${CRON_FULL_SYNC:-0 2 * * *}
-      - CRON_DELETED_ITEMS_CLEANUP=${CRON_DELETED_ITEMS_CLEANUP:-0 * * * *}
-      # Skip full sync on server startup (set to "true" or "1" to skip)
-      - SKIP_STARTUP_FULL_SYNC=${SKIP_STARTUP_FULL_SYNC:-false}
-    volumes:
-      - ./apps/streamystats/data:/var/lib/postgresql/data
     restart: unless-stopped
 
   reclaimerr:
