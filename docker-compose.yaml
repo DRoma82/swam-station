@@ -17,6 +17,8 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .secrets.env
     environment:
@@ -188,14 +190,13 @@ services:
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
+    network_mode: host
     env_file:
       - .shared.env
     volumes:
       - ./apps/homeassistant:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
-    ports:
-      - 8123:8123
     restart: unless-stopped
 
   tinfoil:

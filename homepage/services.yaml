@@ -96,13 +96,13 @@
         icon: homeassistant
         href: http://ha.dannyroma.ca
         description: Home Automation
-        ping: home-assistant
+        ping: host.docker.internal
         server: swam-station-docker
         container: homeassistant
-        siteMonitor: http://homeassistant:8123
+        siteMonitor: http://host.docker.internal:8123
         widget:
           type: homeassistant
-          url: http://homeassistant:8123
+          url: http://host.docker.internal:8123
           key: {{HOMEPAGE_VAR_HOMEASSISTANT_KEY}}
     - Homepage:
         icon: homepage
