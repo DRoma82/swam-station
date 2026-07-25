@@ -164,7 +164,6 @@ services:
       - /mnt/seagate/media/radarr:/data/movies
       - /mnt/seagate/media/Bellesa:/data/bellesa
       - /mnt/seagate/media/Masterclass:/data/masterclass
-      - ./letsencrypt:/cert
       - /usr/bin/whisper-cli:/usr/bin/whisper-cli:ro
       - /mnt/seagate/WhisperModels:/WhisperModels:ro
     devices:
@@ -173,7 +172,6 @@ services:
       - 8096:8096
       - 8920:8920
       - 7359:7359/udp # discovery
-      - 1900:1900/udp # announce
     restart: unless-stopped
 
   jellystat-db:
