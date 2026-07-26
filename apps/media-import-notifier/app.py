@@ -183,7 +183,10 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "media-import-notifier/1.0"
 
     def log_message(self, fmt: str, *args: Any) -> None:
-        print(f"{self.address_string()} - {fmt % args}", file=sys.stderr, flush=True)
+        msg = fmt % args
+        if WEBHOOK_TOKEN:
+            msg = msg.replace(WEBHOOK_TOKEN, "[redacted]")
+        print(f"{self.address_string()} - {msg}", file=sys.stderr, flush=True)
 
     def send_json(self, status: int, payload: dict[str, Any]) -> None:
         body = json.dumps(payload).encode()
