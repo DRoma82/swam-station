@@ -221,6 +221,10 @@ services:
       - "9119:9119" # Hermes dashboard, protected by basic auth
     volumes:
       - ./apps/hermes:/opt/data
+      - /home/danny/dotfiles:/workspace/dotfiles
+      - /home/danny/docker:/workspace/docker
+      - /home/danny/obsidian:/workspace/obsidian
+      - /mnt/seagate:/workspace/seagate
     shm_size: "1gb"
 
   firecrawl:
