@@ -133,14 +133,18 @@ services:
     restart: unless-stopped
 
   media-import-notifier:
-    build: ./apps/media-import-notifier
+    image: python:slim
     container_name: media-import-notifier
     restart: unless-stopped
+    working_dir: /app
+    command: python /app/app.py
     env_file:
       - .shared.env
       - .secrets.env
     environment:
       - MEDIA_IMPORT_JELLYFIN_NOTE=Available in Jellyfin soon
+    volumes:
+      - /home/danny/docker/apps/media-import-notifier:/app:ro
     expose:
       - "8080"
 
@@ -257,6 +261,7 @@ services:
       - "9119:9119" # Hermes dashboard, protected by basic auth
     volumes:
       - ./apps/hermes:/opt/data
+      - /usr/lib/docker/cli-plugins/docker-compose:/usr/lib/docker/cli-plugins/docker-compose:ro
       - /home/danny/dotfiles:/workspace/dotfiles
       - /home/danny/docker:/workspace/docker
       - /home/danny/obsidian:/workspace/obsidian
