@@ -132,6 +132,18 @@ services:
       - 7878:7878
     restart: unless-stopped
 
+  media-import-notifier:
+    build: ./apps/media-import-notifier
+    container_name: media-import-notifier
+    restart: unless-stopped
+    env_file:
+      - .shared.env
+      - .secrets.env
+    environment:
+      - MEDIA_IMPORT_JELLYFIN_NOTE=Available in Jellyfin soon
+    expose:
+      - "8080"
+
   unpackerr:
     image: golift/unpackerr
     container_name: unpackerr
