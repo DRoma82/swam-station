@@ -52,6 +52,23 @@ def nested(data: dict[str, Any], path: str) -> dict[str, Any]:
     return cur if isinstance(cur, dict) else {}
 
 
+def first_dict(data: dict[str, Any], *paths: str) -> dict[str, Any]:
+    for path in paths:
+        cur: Any = data
+        for part in path.split("."):
+            if isinstance(cur, dict):
+                cur = cur.get(part, {})
+            elif isinstance(cur, list) and part.isdigit():
+                idx = int(part)
+                cur = cur[idx] if 0 <= idx < len(cur) else {}
+            else:
+                cur = {}
+                break
+        if isinstance(cur, dict) and cur:
+            return cur
+    return {}
+
+
 def first_non_empty(*values: str) -> str:
     return next((v for v in values if v), "")
 
@@ -72,16 +89,23 @@ def quality(data: dict[str, Any]) -> str:
     return q
 
 
-def release_group(data: dict[str, Any]) -> str:
-    return first_non_empty(
-        pick(data, "episodeFile.releaseGroup"),
-        pick(data, "movieFile.releaseGroup"),
-        pick(data, "releaseGroup"),
-    )
-
-
 def link_line(label: str, url: str) -> str:
     return f'<a href="{html.escape(url, quote=True)}">{html.escape(label)}</a>'
+
+
+def cover_image_url(media: dict[str, Any]) -> str:
+    images = media.get("images", [])
+    if not isinstance(images, list):
+        return ""
+
+    for cover_type in ("poster", "cover", "fanart"):
+        for image in images:
+            if not isinstance(image, dict) or image.get("coverType") != cover_type:
+                continue
+            url = first_non_empty(str(image.get("remoteUrl") or ""), str(image.get("url") or ""))
+            if url.startswith(("http://", "https://")):
+                return url
+    return ""
 
 
 def tvdb_url(tvdb_id: str, kind: str = "series") -> str:
@@ -94,24 +118,24 @@ def imdb_url(imdb_id: str) -> str:
     return f"https://www.imdb.com/title/{urllib.parse.quote(imdb_id)}/"
 
 
-def format_sonarr(data: dict[str, Any]) -> str:
+def format_sonarr(data: dict[str, Any]) -> tuple[str, str]:
     series = nested(data, "series")
-    episode = nested(data, "episode")
+    episode = first_dict(data, "episode", "episodes.0")
     title = first_non_empty(pick(series, "title"), pick(data, "series.title"), "Unknown series")
     season = first_non_empty(pick(episode, "seasonNumber"), pick(data, "seasonNumber"))
     episode_num = first_non_empty(pick(episode, "episodeNumber"), pick(data, "episodeNumber"))
     ep_title = first_non_empty(pick(episode, "title"), pick(data, "episode.title"), "Unknown episode")
     code = f"S{int(season):02d}E{int(episode_num):02d}" if season.isdigit() and episode_num.isdigit() else ""
 
-    lines = ["<b>New episode imported</b>"]
-    lines.append(html.escape(" - ".join(x for x in [title, code, ep_title] if x)))
+    lines = ["<b>New episode imported</b>", html.escape(title)]
+    if code:
+        lines.append(f"Episode: {html.escape(code)} - {html.escape(ep_title)}")
+    else:
+        lines.append(f"Episode: {html.escape(ep_title)}")
 
     q = quality(data)
     if q:
         lines.append(f"Quality: {html.escape(q)}")
-    rg = release_group(data)
-    if rg:
-        lines.append(f"Release group: {html.escape(rg)}")
 
     imdb_id = first_non_empty(pick(series, "imdbId"), pick(data, "series.imdbId"))
     episode_tvdb = first_non_empty(pick(episode, "tvdbId"), pick(data, "episode.tvdbId"))
@@ -128,10 +152,10 @@ def format_sonarr(data: dict[str, Any]) -> str:
 
     if JELLYFIN_NOTE:
         lines.append(html.escape(JELLYFIN_NOTE))
-    return "\n".join(lines)
+    return "\n".join(lines), cover_image_url(series)
 
 
-def format_radarr(data: dict[str, Any]) -> str:
+def format_radarr(data: dict[str, Any]) -> tuple[str, str]:
     movie = nested(data, "movie")
     title = first_non_empty(pick(movie, "title"), pick(data, "movie.title"), "Unknown movie")
     year = first_non_empty(pick(movie, "year"), pick(data, "movie.year"))
@@ -141,9 +165,6 @@ def format_radarr(data: dict[str, Any]) -> str:
     q = quality(data)
     if q:
         lines.append(f"Quality: {html.escape(q)}")
-    rg = release_group(data)
-    if rg:
-        lines.append(f"Release group: {html.escape(rg)}")
 
     imdb_id = first_non_empty(pick(movie, "imdbId"), pick(data, "movie.imdbId"))
     tmdb_id = first_non_empty(pick(movie, "tmdbId"), pick(data, "movie.tmdbId"))
@@ -157,21 +178,30 @@ def format_radarr(data: dict[str, Any]) -> str:
 
     if JELLYFIN_NOTE:
         lines.append(html.escape(JELLYFIN_NOTE))
-    return "\n".join(lines)
+    return "\n".join(lines), cover_image_url(movie)
 
 
-def telegram_send(message: str) -> None:
+def telegram_send(message: str, image_url: str = "") -> None:
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         raise RuntimeError("TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set")
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = urllib.parse.urlencode(
-        {
+
+    if image_url:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+        fields = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "photo": image_url,
+            "caption": message,
+            "parse_mode": "HTML",
+        }
+    else:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        fields = {
             "chat_id": TELEGRAM_CHAT_ID,
             "text": message,
             "parse_mode": "HTML",
             "disable_web_page_preview": "true",
         }
-    ).encode()
+    payload = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(url, data=payload, method="POST")
     with urllib.request.urlopen(req, timeout=10) as resp:
         body = resp.read().decode("utf-8", "replace")
@@ -221,8 +251,8 @@ class Handler(BaseHTTPRequestHandler):
             if event and event not in IMPORT_EVENTS:
                 self.send_json(202, {"ok": True, "ignored": event})
                 return
-            message = format_sonarr(data) if service == "sonarr" else format_radarr(data)
-            telegram_send(message)
+            message, image_url = format_sonarr(data) if service == "sonarr" else format_radarr(data)
+            telegram_send(message, image_url)
             self.send_json(200, {"ok": True})
         except Exception as exc:
             print(f"error handling {service} webhook: {exc}", file=sys.stderr, flush=True)

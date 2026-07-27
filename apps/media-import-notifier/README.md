@@ -19,6 +19,6 @@ The service accepts:
 
 ## Notification contents
 
-Episode notifications include series title, season/episode, episode title, quality, release group, IMDB link, and TVDB episode link when Sonarr sends an episode TVDB id. If Sonarr only sends the series TVDB id, the message links to the TVDB series page.
+Episode notifications include series title, season/episode number, episode title, quality, IMDB link, TVDB episode/series link, and a poster/cover image when Sonarr sends one.
 
-Movie notifications include movie title, year, quality, release group, IMDB link, and TMDB link when available.
+Movie notifications include movie title, year, quality, IMDB link, TMDB link, and a poster/cover image when Radarr sends one.
