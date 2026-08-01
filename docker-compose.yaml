@@ -54,6 +54,7 @@ services:
   hermes-docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
     container_name: hermes-docker-socket-proxy
+    profiles: ["hermes"] # disabled by default; start with: docker compose --profile hermes up -d
     environment:
       - BUILD=1
       - CONTAINERS=1
@@ -86,6 +87,7 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
+    profiles: ["media"]
     environment:
       - WEBUI_PORT=9090
     env_file:
@@ -102,6 +104,7 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    profiles: ["media"]
     env_file:
       - .shared.env
     volumes:
@@ -113,6 +116,7 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    profiles: ["media"]
     env_file:
       - .shared.env
     volumes:
@@ -125,6 +129,7 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    profiles: ["media"]
     env_file:
       - .shared.env
     volumes:
@@ -137,6 +142,7 @@ services:
   media-import-notifier:
     image: python:slim
     container_name: media-import-notifier
+    profiles: ["media"]
     restart: unless-stopped
     working_dir: /app
     command: python /app/app.py
@@ -153,6 +159,7 @@ services:
   unpackerr:
     image: golift/unpackerr
     container_name: unpackerr
+    profiles: ["media"]
     volumes:
       - /mnt/seagate:/seagate
       - ./unpackerr:/config
@@ -172,6 +179,7 @@ services:
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
+    profiles: ["media"]
     env_file:
       - .shared.env
     volumes:
@@ -184,6 +192,7 @@ services:
   tdarr:
     image: ghcr.io/haveagitgat/tdarr:latest
     container_name: tdarr
+    profiles: ["media"]
     env_file:
       - .shared.env
     environment:
@@ -210,6 +219,7 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
+    profiles: ["media"]
     env_file:
       - .shared.env
     ports:
@@ -221,6 +231,7 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
+    profiles: ["media"]
     environment:
       - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
     env_file:
@@ -244,6 +255,7 @@ services:
   reclaimerr:
     image: ghcr.io/jessielw/reclaimerr:latest
     container_name: reclaimerr
+    profiles: ["media"]
     restart: unless-stopped
     env_file:
       - .shared.env
@@ -267,6 +279,7 @@ services:
   hermes:
     image: nousresearch/hermes-agent:latest
     container_name: hermes
+    profiles: ["hermes"] # disabled by default; start with: docker compose --profile hermes up -d
     restart: unless-stopped
     command: gateway run
     depends_on:
@@ -302,6 +315,7 @@ services:
   firecrawl:
     image: ghcr.io/firecrawl/firecrawl:latest
     container_name: firecrawl
+    profiles: ["hermes"]
     restart: unless-stopped
     command: node dist/src/harness.js --start-docker
     env_file:
@@ -344,6 +358,7 @@ services:
   firecrawl-playwright:
     image: ghcr.io/firecrawl/playwright-service:latest
     container_name: firecrawl-playwright
+    profiles: ["hermes"]
     restart: unless-stopped
     environment:
       - PORT=3000
@@ -359,6 +374,7 @@ services:
   firecrawl-redis:
     image: redis:alpine
     container_name: firecrawl-redis
+    profiles: ["hermes"]
     restart: unless-stopped
     command: redis-server --bind 0.0.0.0
     networks:
@@ -367,6 +383,7 @@ services:
   firecrawl-rabbitmq:
     image: rabbitmq:3-management
     container_name: firecrawl-rabbitmq
+    profiles: ["hermes"]
     restart: unless-stopped
     command: rabbitmq-server
     healthcheck:
@@ -381,6 +398,7 @@ services:
   firecrawl-postgres:
     image: ghcr.io/firecrawl/nuq-postgres:latest
     container_name: firecrawl-postgres
+    profiles: ["hermes"]
     restart: unless-stopped
     env_file:
       - .secrets.env
@@ -395,6 +413,7 @@ services:
   tinfoil:
     image: nginx:alpine
     container_name: tinfoil
+    profiles: ["utils"]
     volumes:
       - /mnt/seagate/tinfoil:/usr/share/nginx/html/:ro
       - ./tinfoil:/etc/nginx:ro
@@ -405,6 +424,7 @@ services:
   yt-music-download:
     build: ./apps/YtMusicDownload
     container_name: yt-music-download
+    profiles: ["utils"]
     ports:
       - "8013:8013"
     environment:
