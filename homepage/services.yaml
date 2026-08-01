@@ -103,6 +103,18 @@
           type: prowlarr
           url: http://prowlarr:9696
           key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
+    - Linkding:
+        icon: linkding
+        href: https://lnk.dannyroma.ca
+        description: Bookmark Manager
+        ping: linkding
+        server: swam-station-docker
+        container: linkding
+        siteMonitor: http://linkding:9090
+        widget:
+          type: linkding
+          url: http://linkding:9090
+          key: {{HOMEPAGE_VAR_LINKDING_KEY}}
     - Home Assistant:
         icon: home-assistant
         href: http://ha.dannyroma.ca

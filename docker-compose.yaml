@@ -20,7 +20,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     env_file:
-      - .secrets.env
+      - .secrets.homepage.env
     environment:
       - HOMEPAGE_ALLOWED_HOSTS=home.${SECRET_DOMAIN?error}
     ports:
@@ -79,7 +79,7 @@ services:
     container_name: ddclient
     env_file:
       - .shared.env
-      - .secrets.env
+      - .secrets.ddns.env
     volumes:
       - ./apps/ddclient:/config
     restart: unless-stopped
@@ -148,7 +148,7 @@ services:
     command: python /app/app.py
     env_file:
       - .shared.env
-      - .secrets.env
+      - .secrets.notifier.env
     environment:
       - MEDIA_IMPORT_JELLYFIN_NOTE=Available in Jellyfin soon
     volumes:
@@ -167,10 +167,11 @@ services:
       - UN_LOG_FILE=/seagate/downloads/unpackerr.log
       - UN_SONARR_0_URL=http://sonarr:8989
       - UN_RADARR_0_URL=http://radarr:7878
+      - UN_SONARR_0_API_KEY=${SECRET_SONARR_KEY?error}
+      - UN_RADARR_0_API_KEY=${SECRET_RADARR_KEY?error}
       - UN_WEBSERVER_METRICS=true
     env_file:
       - .shared.env
-      - .secrets.env
     ports:
       - 5656:5656
     restart: unless-stopped
@@ -264,6 +265,28 @@ services:
     ports:
       - "8000:8000"
 
+  linkding:
+    image: sissbruecker/linkding:latest
+    container_name: linkding
+    env_file:
+      - .shared.env
+    environment:
+      # Superuser is auto-created on first start from these (set them in a
+      # dedicated .secrets.linkding.env if you ever recreate the volume):
+      #   LD_SUPERUSER_NAME=...
+      #   LD_SUPERUSER_PASSWORD=...
+      - LD_HOST_PORT=9091
+    volumes:
+      - ./apps/linkding:/etc/linkding/data
+    ports:
+      - 9091:9090 # host 9091 -> linkding 9090 (9090 already used by qbittorrent)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
@@ -289,7 +312,7 @@ services:
       - "host.docker.internal:host-gateway"
     env_file:
       - .shared.env
-      - .secrets.env
+      - .secrets.hermes.env
     environment:
       - HERMES_DASHBOARD=1
       - HERMES_DASHBOARD_HOST=0.0.0.0
@@ -319,7 +342,7 @@ services:
     restart: unless-stopped
     command: node dist/src/harness.js --start-docker
     env_file:
-      - .secrets.env
+      - .secrets.firecrawl.env
     environment:
       - HOST=0.0.0.0
       - PORT=3002
@@ -401,7 +424,7 @@ services:
     profiles: ["hermes"]
     restart: unless-stopped
     env_file:
-      - .secrets.env
+      - .secrets.firecrawl.env
     environment:
       - POSTGRES_USER=firecrawl
       - POSTGRES_DB=postgres
@@ -455,7 +478,6 @@ services:
       - DOCKER_API_VERSION=1.40
     env_file:
       - .shared.env
-      - .secrets.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # ports:
