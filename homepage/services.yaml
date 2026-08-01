@@ -67,6 +67,17 @@
         siteMonitor: http://tinfoil:9000
 
 - Tools:
+    - Tdarr:
+        icon: tdarr
+        href: https://tdarr.dannyroma.ca
+        description: Library Automation / Subtitle Extract
+        ping: tdarr
+        server: swam-station-docker
+        container: tdarr
+        siteMonitor: http://tdarr:8265
+        widget:
+          type: tdarr
+          url: http://tdarr:8265
     - qBitTorrent:
         icon: qbittorrent
         href: http://qbit.dannyroma.ca

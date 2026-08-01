@@ -181,6 +181,32 @@ services:
       - 6767:6767
     restart: unless-stopped
 
+  tdarr:
+    image: ghcr.io/haveagitgat/tdarr:latest
+    container_name: tdarr
+    env_file:
+      - .shared.env
+    environment:
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=7
+      - nodeName=SwamNode
+    ports:
+      - 8265:8265
+      - 8266:8266
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./apps/tdarr/server:/app/server
+      - ./apps/tdarr/configs:/app/configs
+      - ./apps/tdarr/logs:/app/logs
+      - ./apps/tdarr/transcode_cache:/temp
+      - /mnt/seagate:/seagate
+    restart: unless-stopped
+
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
