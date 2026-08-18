@@ -21,6 +21,14 @@
           enableUser: true # optional, defaults to false
           showEpisodeNumber: true # optional, defaults to false
           expandOneStreamToTwoRows: false # optional, defaults to true
+    - Jellyswarrm:
+        icon: jellyfin
+        href: https://swarrm.dannyroma.ca
+        description: Jellyfin Multi-Server Proxy
+        ping: jellyswarrm
+        server: swam-station-docker
+        container: jellyswarrm
+        siteMonitor: http://jellyswarrm:3000
     - Jellyseerr:
         icon: jellyseerr
         href: https://jellyseerr.dannyroma.ca

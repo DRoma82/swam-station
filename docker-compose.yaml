@@ -253,6 +253,22 @@ services:
       - 7359:7359/udp # discovery
     restart: unless-stopped
 
+  jellyswarrm:
+    image: fivespeeddeasil/jellyswarrm:latest
+    container_name: jellyswarrm
+    profiles: ["media"]
+    env_file:
+      - .shared.env
+      - .secrets.jellyswarrm.env
+    environment:
+      - JELLYSWARRM_DATA_DIR=/data
+      - RUST_LOG=info
+    volumes:
+      - ./apps/jellyswarrm:/data
+    ports:
+      - 8097:3000 # host 8097 -> jellyswarrm 3000 (matches public_address in jellyswarrm.toml)
+    restart: unless-stopped
+
   reclaimerr:
     image: ghcr.io/jessielw/reclaimerr:latest
     container_name: reclaimerr
