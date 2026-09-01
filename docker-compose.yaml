@@ -449,15 +449,11 @@ services:
     networks:
       - firecrawl-internal
 
-  tinfoil:
-    image: nginx:alpine
-    container_name: tinfoil
-    profiles: ["utils"]
+  lessons:
+    build: ./lessons-site
+    container_name: lessons
     volumes:
-      - /mnt/seagate/tinfoil:/usr/share/nginx/html/:ro
-      - ./tinfoil:/etc/nginx:ro
-    ports:
-      - 9000:9000
+      - /home/danny/obsidian/lessons:/usr/share/nginx/lessons:ro
     restart: unless-stopped
 
   yt-music-download:
