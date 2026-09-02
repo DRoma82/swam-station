@@ -15,6 +15,7 @@ const isMarkdown = /\.md$/i.test(parts.at(-1) || '')
 const isHtml = /\.html$/i.test(parts.at(-1) || '')
 const isPage = isMarkdown || isHtml
 const path = `/${parts.map(encodeURIComponent).join('/')}${isPage || !parts.length ? '' : '/'}`
+const contentUrl = `/api${path}?v=${Date.now()}`
 const markdownIt = new MarkdownIt({ html: false, linkify: true, typographer: true })
 
 const breadcrumbs = computed(() => parts.map((name, index) => ({
@@ -42,7 +43,7 @@ function resizeLessonFrame() {
 }
 
 async function loadTree() {
-  const response = await fetch('/api/')
+  const response = await fetch('/api/', { cache: 'no-store' })
   if (!response.ok) return
   treeEntries.value = (await response.json()).filter((entry) => (
     entry.type === 'directory' ? entry.name.toLowerCase() !== 'assets' : /\.(html|md)$/i.test(entry.name)
@@ -59,7 +60,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await fetch(`/api${path}`)
+    const response = await fetch(contentUrl, { cache: 'no-store' })
     if (!response.ok) throw new Error(`Request failed (${response.status})`)
     if (isMarkdown) markdown.value = await response.text()
     else if (!isHtml) entries.value = await response.json()
@@ -113,7 +114,7 @@ onMounted(async () => {
         v-else-if="isHtml"
         ref="lessonFrame"
         class="lesson-frame"
-        :src="`/api${path}`"
+        :src="contentUrl"
         :title="parts.at(-1)"
         @load="resizeLessonFrame"
       ></iframe>

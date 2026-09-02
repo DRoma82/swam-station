@@ -19,7 +19,7 @@ const isCurrent = computed(() => {
 })
 async function load() {
   if (loaded.value) return
-  const response = await fetch(`/api${props.path}/`)
+  const response = await fetch(`/api${props.path}/`, { cache: 'no-store' })
   if (!response.ok) return
   entries.value = (await response.json()).filter((entry) => (
     entry.type === 'directory' ? entry.name.toLowerCase() !== 'assets' : /\.(html|md)$/i.test(entry.name)
