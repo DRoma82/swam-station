@@ -6,3 +6,7 @@ letsencrypt/
 apps/
 .htpasswd
 yt_dlp_update.log
+__pycache__/
+*.pyc
+build/
+*.egg-info/
