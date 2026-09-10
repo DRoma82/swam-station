@@ -11,7 +11,7 @@ sudo pacman -S --needed mkvtoolnix-cli tesseract tesseract-data-eng python-pipx
 pipx install ./subtitle-translator
 ```
 
-The translator calls the installed `pi` command with its GitHub Copilot provider, so it uses the same Copilot login and model access as Pi. Authenticate through Pi with `/login` before the first translation.
+The translator calls 9Router's OpenAI-compatible API directly. By default it reads `NINE_ROUTER_ENDPOINT` and `NINE_ROUTER_API_KEY` from `~/dotfiles/.9router.env` and uses `gh/claude-sonnet-5`. Set `NINE_ROUTER_ENV_FILE` to use another env file, or export either setting to override the file.
 
 ## Use
 
