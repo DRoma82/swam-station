@@ -75,6 +75,13 @@
         siteMonitor: http://tinfoil:9000
 
 - Tools:
+    - 9router:
+        icon: mdi-train
+        href: https://platform9.dannyroma.ca
+        description: AI Provider Gateway
+        server: swam-station-docker
+        container: 9router
+        siteMonitor: http://9router:20128/api/health
     - Tdarr:
         icon: tdarr
         href: https://tdarr.dannyroma.ca

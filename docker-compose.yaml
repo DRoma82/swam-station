@@ -303,6 +303,37 @@ services:
       retries: 3
     restart: unless-stopped
 
+  9router:
+    image: decolua/9router:latest
+    container_name: 9router
+    init: true
+    restart: unless-stopped
+    env_file:
+      - .secrets.9router.env
+    environment:
+      - TZ=America/Vancouver
+      - DATA_DIR=/app/data
+      - ENABLE_REQUEST_LOGS=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "0.0.0.0:20128:20128"
+    volumes:
+      - ./apps/9router:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:20128/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
